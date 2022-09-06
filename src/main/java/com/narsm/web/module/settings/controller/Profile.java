@@ -21,6 +21,7 @@ public class Profile {
     private String job;
     @Length(max = 50)
     private String location;
+    private String image; // 추가
 
     public static Profile from(Account account) {
         return new Profile(account);
@@ -31,5 +32,6 @@ public class Profile {
         this.job = Optional.ofNullable(account.getProfile()).map(Account.Profile::getJob).orElse(null);
         this.url = Optional.ofNullable(account.getProfile()).map(Account.Profile::getUrl).orElse(null);
         this.location = Optional.ofNullable(account.getProfile()).map(Account.Profile::getLocation).orElse(null);
+        this.image = Optional.ofNullable(account.getProfile()).map(Account.Profile::getImage).orElse(null); // 추가
     }
 }

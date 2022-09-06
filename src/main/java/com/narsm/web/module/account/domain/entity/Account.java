@@ -89,6 +89,7 @@ public class Account extends AuditingEntity {
         this.profile.url = profile.getUrl();
         this.profile.job = profile.getJob();
         this.profile.location = profile.getLocation();
+        this.profile.image = profile.getImage();
     }
 
     @Embeddable
