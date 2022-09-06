@@ -60,8 +60,7 @@ public class AccountController {
             model.addAttribute("error", "wrong.token");
             return "account/email-verification";
         }
-        account.verified();
-        accountService.login(account);
+        accountService.verify(account);
         model.addAttribute("numberOfUsers", accountRepository.count());
         model.addAttribute("nickname", account.getNickname());
         return "account/email-verification";
@@ -87,11 +86,11 @@ public class AccountController {
     @GetMapping("/profile/{nickname}")
     public String viewProfile(@PathVariable String nickname, Model model, @CurrentUser Account account) {
         Account byNickname = accountRepository.findByNickname(nickname);
-        if (byNickname == null) { // nickname에 해당하는 사용자가 없으면 예외를 던집니다.
+        if (byNickname == null) {
             throw new IllegalArgumentException(nickname + "에 해당하는 사용자가 없습니다.");
         }
-        model.addAttribute(byNickname); // 키를 생략하면 객체 타입을 camel-case로 전달합니다.
-        model.addAttribute("isOwner", byNickname.equals(account)); // 전달된 객체와 DB에서 조회한 객체가 같으면 인증된 사용자입니다.
+        model.addAttribute(byNickname);
+        model.addAttribute("isOwner", byNickname.equals(account));
         return "account/profile";
     }
 }
