@@ -81,6 +81,15 @@ public class Account extends AuditingEntity {
         }
     }
 
+    public void updateProfile(com.narsm.web.module.settings.controller.Profile profile) {
+        if (this.profile == null) {
+            this.profile = new Profile();
+        }
+        this.profile.bio = profile.getBio();
+        this.profile.url = profile.getUrl();
+        this.profile.job = profile.getJob();
+        this.profile.location = profile.getLocation();
+    }
 
     @Embeddable
     @NoArgsConstructor(access = AccessLevel.PROTECTED) @AllArgsConstructor(access = AccessLevel.PROTECTED)
