@@ -1,5 +1,6 @@
 package com.narsm.web.module.settings.controller;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.narsm.web.module.account.application.AccountService;
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.support.CurrentUser;
@@ -44,6 +47,7 @@ public class SettingsController {
     private final PasswordFormValidator passwordFormValidator;
     private final NicknameFormValidator nicknameFormValidator;
     private final TagRepository tagRepository;
+    private final ObjectMapper objectMapper;
 
     @InitBinder("passwordForm")
     public void passwordFormValidator(WebDataBinder webDataBinder) {
@@ -134,6 +138,17 @@ public class SettingsController {
         model.addAttribute("tags", tags.stream()
                 .map(Tag::getTitle)
                 .collect(Collectors.toList()));
+        List<String> allTags = tagRepository.findAll()
+                .stream()
+                .map(Tag::getTitle)
+                .collect(Collectors.toList());
+        String whitelist = null;
+        try {
+            whitelist = objectMapper.writeValueAsString(allTags);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        model.addAttribute("whitelist", whitelist);
         return SETTINGS_TAGS_VIEW_NAME;
     }
 
