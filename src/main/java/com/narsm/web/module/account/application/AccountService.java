@@ -2,6 +2,7 @@ package com.narsm.web.module.account.application;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -21,6 +22,7 @@ import com.narsm.web.module.account.endpoint.controller.SignUpForm;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
 import com.narsm.web.module.settings.controller.NotificationForm;
 import com.narsm.web.module.settings.controller.Profile;
+import com.narsm.web.module.tag.domain.entity.Tag;
 
 import lombok.RequiredArgsConstructor;
 
@@ -117,5 +119,20 @@ public class AccountService implements UserDetailsService {
         mailMessage.setSubject("[Webluxible] 로그인 링크");
         mailMessage.setText("/login-by-email?token=" + account.getEmailToken() + "&email=" + account.getEmail());
         mailSender.send(mailMessage);
+    }
+
+    public void addTag(Account account, Tag tag) {
+        accountRepository.findById(account.getId())
+                .ifPresent(a -> a.getTags().add(tag));
+    }
+
+    public Set<Tag> getTags(Account account) {
+        return accountRepository.findById(account.getId()).orElseThrow().getTags();
+    }
+
+    public void removeTag(Account account, Tag tag) {
+        accountRepository.findById(account.getId())
+                .map(Account::getTags)
+                .ifPresent(tags -> tags.remove(tag));
     }
 }

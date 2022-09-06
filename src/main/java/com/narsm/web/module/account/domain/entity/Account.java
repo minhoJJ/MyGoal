@@ -22,6 +22,7 @@ import org.hibernate.Hibernate;
 
 import com.narsm.web.module.domain.entity.AuditingEntity;
 import com.narsm.web.module.settings.controller.NotificationForm;
+import com.narsm.web.module.tag.domain.entity.Tag;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
