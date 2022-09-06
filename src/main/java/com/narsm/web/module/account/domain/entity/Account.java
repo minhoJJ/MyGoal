@@ -1,12 +1,11 @@
 package com.narsm.web.module.account.domain.entity;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -14,8 +13,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.PostLoad;
 
-import com.narsm.web.module.account.domain.support.ListStringConverter;
+import org.hibernate.Hibernate;
+
 import com.narsm.web.module.domain.entity.AuditingEntity;
 
 import lombok.AccessLevel;
@@ -49,10 +50,10 @@ public class Account extends AuditingEntity {
     private LocalDateTime joinedAt;
 
     @Embedded
-    private Profile profile;
+    private Profile profile = new Profile();
 
     @Embedded
-    private NotificationSetting notificationSetting;
+    private NotificationSetting notificationSetting = new NotificationSetting();
 
     private LocalDateTime emailTokenGeneratedAt;
 
@@ -70,16 +71,27 @@ public class Account extends AuditingEntity {
         joinedAt = LocalDateTime.now();
     }
 
+    @PostLoad
+    private void init() {
+        if (profile == null) {
+            profile = new Profile();
+        }
+        if (notificationSetting == null) {
+            notificationSetting = new NotificationSetting();
+        }
+    }
+
+
     @Embeddable
     @NoArgsConstructor(access = AccessLevel.PROTECTED) @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @Builder @Getter @ToString
     public static class Profile {
         private String bio;
-        @Convert(converter = ListStringConverter.class)
-        private List<String> url;
+        private String url;
         private String job;
         private String location;
         private String company;
+
         @Lob @Basic(fetch = FetchType.EAGER)
         private String image;
     }
@@ -94,5 +106,23 @@ public class Account extends AuditingEntity {
         private boolean studyRegistrationResultByWeb;
         private boolean studyUpdatedByEmail;
         private boolean studyUpdatedByWeb;
+
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        Account account = (Account) o;
+        return id != null && Objects.equals(id, account.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

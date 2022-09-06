@@ -9,6 +9,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.narsm.web.module.account.application.AccountService;
@@ -81,5 +82,16 @@ public class AccountController {
         }
         accountService.sendVerificationEmail(account);
         return "redirect:/";
+    }
+
+    @GetMapping("/profile/{nickname}")
+    public String viewProfile(@PathVariable String nickname, Model model, @CurrentUser Account account) {
+        Account byNickname = accountRepository.findByNickname(nickname);
+        if (byNickname == null) { // nickname에 해당하는 사용자가 없으면 예외를 던집니다.
+            throw new IllegalArgumentException(nickname + "에 해당하는 사용자가 없습니다.");
+        }
+        model.addAttribute(byNickname); // 키를 생략하면 객체 타입을 camel-case로 전달합니다.
+        model.addAttribute("isOwner", byNickname.equals(account)); // 전달된 객체와 DB에서 조회한 객체가 같으면 인증된 사용자입니다.
+        return "account/profile";
     }
 }
