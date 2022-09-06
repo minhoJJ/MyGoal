@@ -1,7 +1,9 @@
 package com.narsm.web.module.account.domain.entity;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Basic;
@@ -13,6 +15,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.PostLoad;
 
 import org.hibernate.Hibernate;
@@ -57,6 +60,9 @@ public class Account extends AuditingEntity {
     private NotificationSetting notificationSetting = new NotificationSetting();
 
     private LocalDateTime emailTokenGeneratedAt;
+
+    @ManyToMany @ToString.Exclude
+    private Set<Tag> tags = new HashSet<>();;
 
     public void generateToken() {
         this.emailToken = UUID.randomUUID().toString();
