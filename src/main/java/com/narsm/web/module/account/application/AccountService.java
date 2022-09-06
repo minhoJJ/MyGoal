@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.narsm.web.module.account.domain.UserAccount;
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.endpoint.controller.SignUpForm;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
@@ -61,8 +62,10 @@ public class AccountService {
     }
 
     public void login(Account account) {
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(account.getNickname(),
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(new UserAccount(account),
                 account.getPassword(), Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")));
         SecurityContextHolder.getContext().setAuthentication(token); // AuthenticationManager를 쓰는 방법이 정석적인 방ㅇ법
     }
 }
+
+
