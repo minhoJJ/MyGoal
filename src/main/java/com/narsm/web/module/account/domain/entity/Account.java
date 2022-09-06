@@ -1,6 +1,7 @@
 package com.narsm.web.module.account.domain.entity;
 
 import java.util.List;
+import java.util.UUID;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -24,19 +25,18 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PROTECTED) @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Builder @Getter @ToString
 public class Account extends AuditingEntity {
 
-	@Id @GeneratedValue
-	@Column(name = "account_id")
-	private Long id;
-	
-	@Column(unique = true)                                                                              // (3)
+    @Id @GeneratedValue
+    @Column(name = "account_id")
+    private Long id;
+
+    @Column(unique = true)
     private String email;
 
-    @Column(unique = true)                                                                              // (3)
+    @Column(unique = true)
     private String nickname;
 
     private String password;
@@ -45,18 +45,22 @@ public class Account extends AuditingEntity {
 
     private String emailToken;
 
-    @Embedded                                                                                           // (4)
+    @Embedded
     private Profile profile;
 
-    @Embedded                                                                                           // (4)
+    @Embedded
     private NotificationSetting notificationSetting;
 
-    @Embeddable                                                                                         // (5)
+    public void generateToken() {
+        this.emailToken = UUID.randomUUID().toString();
+    }
+
+    @Embeddable
     @NoArgsConstructor(access = AccessLevel.PROTECTED) @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @Builder @Getter @ToString
     public static class Profile {
         private String bio;
-        @Convert(converter = ListStringConverter.class)                                                 // (6)
+        @Convert(converter = ListStringConverter.class)
         private List<String> url;
         private String job;
         private String location;
@@ -65,16 +69,15 @@ public class Account extends AuditingEntity {
         private String image;
     }
 
-    @Embeddable                                                                                         // (5)
+    @Embeddable
     @NoArgsConstructor(access = AccessLevel.PROTECTED) @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @Builder @Getter @ToString
     public static class NotificationSetting {
         private boolean studyCreatedByEmail;
         private boolean studyCreatedByWeb;
-        private boolean studyRegistrationResultByEmailByEmail;
-        private boolean studyRegistrationResultByEmailByWeb;
+        private boolean studyRegistrationResultByEmail;
+        private boolean studyRegistrationResultByWeb;
         private boolean studyUpdatedByEmail;
         private boolean studyUpdatedByWeb;
     }
-
 }
