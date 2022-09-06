@@ -1,8 +1,10 @@
 package com.narsm.web.module.settings.controller;
 
+import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+@Component
 public class PasswordFormValidator implements Validator {
     @Override
     public boolean supports(Class<?> clazz) {
@@ -17,4 +19,3 @@ public class PasswordFormValidator implements Validator {
         }
     }
 }
-
