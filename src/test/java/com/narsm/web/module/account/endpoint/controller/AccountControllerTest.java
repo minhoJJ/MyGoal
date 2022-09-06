@@ -1,5 +1,7 @@
 package com.narsm.web.module.account.endpoint.controller;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
@@ -20,15 +22,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
 
-@SpringBootTest()
+@SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@TestPropertySource(properties = "classpath:application-test.yml")
 class AccountControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired AccountRepository accountRepository;
@@ -49,8 +50,8 @@ class AccountControllerTest {
     void signUpSubmitWithError() throws Exception {
         mockMvc.perform(post("/sign-up")
                         .param("nickname", "nickname")
-                        .param("email", "email@gmail.com")
-                        .param("password", "1234%")
+                        .param("email", "email@gmail")
+                        .param("password", "1234!")
                         .with(csrf()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -63,16 +64,19 @@ class AccountControllerTest {
         mockMvc.perform(post("/sign-up")
                         .param("nickname", "nickname")
                         .param("email", "email@email.com")
-                        .param("password", "1234%^&&")
+                        .param("password", "1234!@#$")
                         .with(csrf()))
                 .andDo(print())
                 .andExpect(status().is3xxRedirection())
                 .andExpect(view().name("redirect:/"));
 
         assertTrue(accountRepository.existsByEmail("email@email.com"));
+        Account account = accountRepository.findByEmail("email@email.com");
+        assertNotEquals(account.getPassword(), "1234!@#$");
 
         then(mailSender)
                 .should()
                 .send(any(SimpleMailMessage.class));
     }
+
 }

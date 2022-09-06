@@ -1,13 +1,15 @@
 package com.narsm.web.module.account.application;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.endpoint.controller.SignUpForm;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +17,7 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final JavaMailSender mailSender;
+    private final PasswordEncoder passwordEncoder;
 
     public void signUp(SignUpForm signUpForm) {
         Account newAccount = saveNewAccount(signUpForm);
@@ -26,7 +29,7 @@ public class AccountService {
         Account account = Account.builder()
                 .email(signUpForm.getEmail())
                 .nickname(signUpForm.getNickname())
-                .password(signUpForm.getPassword())
+                .password(passwordEncoder.encode(signUpForm.getPassword()))
                 .notificationSetting(Account.NotificationSetting.builder()
                         .studyCreatedByWeb(true)
                         .studyUpdatedByWeb(true)
@@ -45,4 +48,3 @@ public class AccountService {
         mailSender.send(mailMessage);
     }
 }
-
