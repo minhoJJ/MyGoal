@@ -40,3 +40,6 @@ out/
 testdb.lock.db
 testdb.mv.db
 testdb.trace.db
+
+### node_modules ###
+src/main/resources/static/node_modules

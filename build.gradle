@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.7.3'
 	id 'io.spring.dependency-management' version '1.0.13.RELEASE'
 	id 'java'
+	id 'com.github.node-gradle.node' version '3.4.0'
 }
 
 group = 'com.narsm.web'
@@ -37,3 +38,18 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+node {
+	version = '18.8.0'
+	download = true
+	nodeModulesDir = file("${projectDir}/src/main/resources/static")	
+}
+
+task copyFrontLib(type: Copy) {
+    from "${projectDir}/src/main/resources/static"
+    into "${projectDir}/build/resources/main/static/."
+}
+
+
+copyFrontLib.dependsOn npmInstall
+compileJava.dependsOn copyFrontLib

@@ -27,6 +27,7 @@ public class SecurityConfig {
     @Bean
     protected WebSecurityCustomizer webSecurityCustomizer() throws Exception {
         return (web) -> web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+        		.mvcMatchers("/node_modules/**", "/images/**")
         		.antMatchers("/h2-console/**");
     }
     
