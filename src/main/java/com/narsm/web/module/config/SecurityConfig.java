@@ -17,9 +17,10 @@ public class SecurityConfig {
 	@Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-        .mvcMatchers("/", "/login", "/sign-up", "/check-email", "/check-email-token",
-                "/email-login", "/check-email-login", "/login-link", "/testdb/login.jsp").permitAll()
-        .mvcMatchers(HttpMethod.GET, "/profile/*").permitAll().anyRequest().authenticated();
+        .mvcMatchers("/", "/login", "/sign-up", "/check-email-token",
+                "/email-login", "/check-email-login", "/login-link").permitAll()
+        .mvcMatchers(HttpMethod.GET, "/profile/*").permitAll()
+        .anyRequest().authenticated();
         
         return http.build();
     }

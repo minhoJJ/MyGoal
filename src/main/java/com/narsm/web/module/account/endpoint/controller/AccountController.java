@@ -15,6 +15,7 @@ import com.narsm.web.module.account.application.AccountService;
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.endpoint.controller.validator.SignUpFormValidator;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
+import com.narsm.web.module.account.support.CurrentUser;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +25,7 @@ public class AccountController {
 
     private final AccountService accountService;
     private final SignUpFormValidator signUpFormValidator;
+    private final AccountRepository accountRepository;
 
     @InitBinder("signUpForm")
     public void initBinder(WebDataBinder webDataBinder) {
@@ -46,8 +48,6 @@ public class AccountController {
         return "redirect:/";
     }
 
-    private final AccountRepository accountRepository;
-
     @GetMapping("/check-email-token")
     public String verifyEmail(String token, String email, Model model) {
         Account account = accountService.findAccountByEmail(email);
@@ -64,5 +64,22 @@ public class AccountController {
         model.addAttribute("numberOfUsers", accountRepository.count());
         model.addAttribute("nickname", account.getNickname());
         return "account/email-verification";
+    }
+
+    @GetMapping("/check-email")
+    public String checkMail(@CurrentUser Account account, Model model) {
+        model.addAttribute("email", account.getEmail());
+        return "account/check-email";
+    }
+
+    @GetMapping("/resend-email")
+    public String resendEmail(@CurrentUser Account account, Model model) {
+        if (!account.enableToSendEmail()) {
+            model.addAttribute("error", "인증 이메일은 5분에 한 번만 전송할 수 있습니다.");
+            model.addAttribute("email", account.getEmail());
+            return "account/check-email";
+        }
+        accountService.sendVerificationEmail(account);
+        return "redirect:/";
     }
 }

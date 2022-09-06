@@ -48,7 +48,7 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    private void sendVerificationEmail(Account newAccount) {
+    public void sendVerificationEmail(Account newAccount) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(newAccount.getEmail());
         mailMessage.setSubject("Webluxible 회원 가입 인증");
@@ -67,5 +67,3 @@ public class AccountService {
         SecurityContextHolder.getContext().setAuthentication(token); // AuthenticationManager를 쓰는 방법이 정석적인 방ㅇ법
     }
 }
-
-
