@@ -1,8 +1,7 @@
 package com.narsm.web.module.account.endpoint.controller;
 
-import com.narsm.web.module.account.application.AccountService;
-import com.narsm.web.module.account.endpoint.controller.validator.SignUpFormValidator;
-import lombok.RequiredArgsConstructor;
+import javax.validation.Valid;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
@@ -12,7 +11,12 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import javax.validation.Valid;
+import com.narsm.web.module.account.application.AccountService;
+import com.narsm.web.module.account.domain.entity.Account;
+import com.narsm.web.module.account.endpoint.controller.validator.SignUpFormValidator;
+import com.narsm.web.module.account.infra.repository.AccountRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
@@ -39,5 +43,24 @@ public class AccountController {
         }
         accountService.signUp(signUpForm);
         return "redirect:/";
+    }
+
+    private final AccountRepository accountRepository;
+
+    @GetMapping("/check-email-token")
+    public String verifyEmail(String token, String email, Model model) {
+        Account account = accountService.findAccountByEmail(email);
+        if (account == null) {
+            model.addAttribute("error", "wrong.email");
+            return "account/email-verification";
+        }
+        if (!token.equals(account.getEmailToken())) {
+            model.addAttribute("error", "wrong.token");
+            return "account/email-verification";
+        }
+        account.verified();
+        model.addAttribute("numberOfUsers", accountRepository.count());
+        model.addAttribute("nickname", account.getNickname());
+        return "account/email-verification";
     }
 }

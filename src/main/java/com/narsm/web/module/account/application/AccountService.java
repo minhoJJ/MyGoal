@@ -4,6 +4,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.endpoint.controller.SignUpForm;
@@ -19,6 +20,7 @@ public class AccountService {
     private final JavaMailSender mailSender;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public void signUp(SignUpForm signUpForm) {
         Account newAccount = saveNewAccount(signUpForm);
         newAccount.generateToken();
@@ -46,5 +48,9 @@ public class AccountService {
         mailMessage.setText(String.format("/check-email-token?token=%s&email=%s", newAccount.getEmailToken(),
                 newAccount.getEmail()));
         mailSender.send(mailMessage);
+    }
+
+    public Account findAccountByEmail(String email) {
+        return accountRepository.findByEmail(email);
     }
 }
