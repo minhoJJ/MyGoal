@@ -1,0 +1,36 @@
+plugins {
+	id 'org.springframework.boot' version '2.7.3'
+	id 'io.spring.dependency-management' version '1.0.13.RELEASE'
+	id 'java'
+}
+
+group = 'com.narsm.web'
+version = '0.0.1'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+    // spring
+    implementation 'org.springframework.boot:spring-boot-starter-web'       // (1)        
+    implementation 'org.springframework.boot:spring-boot-starter-security'  // (2)    
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'  // (3)    
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'  // (4)    
+    implementation 'org.springframework.boot:spring-boot-starter-mail'      // (5)
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf' // (6)    
+    // devtools
+    compileOnly 'org.projectlombok:lombok'                                              // (7)
+    annotationProcessor 'org.projectlombok:lombok'                                      // (7)        
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'                     // (8)            
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'  // (9)
+    // db
+    runtimeOnly 'com.h2database:h2'                                         // (10)    
+    // test
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'  // (11)    
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
