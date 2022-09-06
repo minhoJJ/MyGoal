@@ -18,6 +18,7 @@ import javax.persistence.PostLoad;
 import org.hibernate.Hibernate;
 
 import com.narsm.web.module.domain.entity.AuditingEntity;
+import com.narsm.web.module.settings.controller.NotificationForm;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -96,6 +97,15 @@ public class Account extends AuditingEntity {
         this.password = newPassword;
     }
 
+    public void updateNotification(NotificationForm notificationForm) {
+        this.notificationSetting.studyCreatedByEmail = notificationForm.isStudyCreatedByEmail();
+        this.notificationSetting.studyCreatedByWeb = notificationForm.isStudyCreatedByWeb();
+        this.notificationSetting.studyUpdatedByWeb = notificationForm.isStudyUpdatedByWeb();
+        this.notificationSetting.studyUpdatedByEmail = notificationForm.isStudyUpdatedByEmail();
+        this.notificationSetting.studyRegistrationResultByEmail = notificationForm.isStudyRegistrationResultByEmail();
+        this.notificationSetting.studyRegistrationResultByWeb = notificationForm.isStudyRegistrationResultByWeb();
+    }
+
     @Embeddable
     @NoArgsConstructor(access = AccessLevel.PROTECTED) @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @Builder @Getter @ToString
@@ -114,12 +124,12 @@ public class Account extends AuditingEntity {
     @NoArgsConstructor(access = AccessLevel.PROTECTED) @AllArgsConstructor(access = AccessLevel.PROTECTED)
     @Builder @Getter @ToString
     public static class NotificationSetting {
-        private boolean studyCreatedByEmail;
-        private boolean studyCreatedByWeb;
-        private boolean studyRegistrationResultByEmail;
-        private boolean studyRegistrationResultByWeb;
-        private boolean studyUpdatedByEmail;
-        private boolean studyUpdatedByWeb;
+        private boolean studyCreatedByEmail = false;
+        private boolean studyCreatedByWeb = true;
+        private boolean studyRegistrationResultByEmail = false;
+        private boolean studyRegistrationResultByWeb = true;
+        private boolean studyUpdatedByEmail = false;
+        private boolean studyUpdatedByWeb = true;
 
     }
 

@@ -19,6 +19,7 @@ import com.narsm.web.module.account.domain.UserAccount;
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.endpoint.controller.SignUpForm;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
+import com.narsm.web.module.settings.controller.NotificationForm;
 import com.narsm.web.module.settings.controller.Profile;
 
 import lombok.RequiredArgsConstructor;
@@ -95,6 +96,11 @@ public class AccountService implements UserDetailsService {
 
     public void updatePassword(Account account, String newPassword) {
         account.updatePassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+    }
+
+    public void updateNotification(Account account, NotificationForm notificationForm) {
+        account.updateNotification(notificationForm);
         accountRepository.save(account);
     }
 }
