@@ -1,6 +1,8 @@
 package com.narsm.web.module.settings.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -19,15 +21,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.narsm.web.module.WithAccount;
+import com.narsm.web.module.account.application.AccountService;
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
+import com.narsm.web.module.tag.domain.entity.Tag;
+import com.narsm.web.module.tag.infra.repository.TagRepository;
 
+@Transactional
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -35,6 +44,10 @@ class SettingsControllerTest {
 
     @Autowired MockMvc mockMvc;
     @Autowired AccountRepository accountRepository;
+    @Autowired TagRepository tagRepository;
+    @Autowired PasswordEncoder passwordEncoder;
+    @Autowired ObjectMapper objectMapper;
+    @Autowired AccountService accountService;
     @MockBean JavaMailSender mailSender;
 
     @AfterEach
@@ -57,7 +70,6 @@ class SettingsControllerTest {
         assertEquals(bio, jaime.getProfile().getBio());
     }
 
-
     @Test
     @DisplayName("프로필 수정: 입력값 에러")
     @WithAccount("jaime")
@@ -79,15 +91,12 @@ class SettingsControllerTest {
     @DisplayName("프로필 조회")
     @WithAccount("jaime")
     void updateProfileForm() throws Exception {
-        String bio = "한 줄 소개";
         mockMvc.perform(get(SettingsController.SETTINGS_PROFILE_URL))
                 .andExpect(status().isOk())
                 .andExpect(view().name(SettingsController.SETTINGS_PROFILE_VIEW_NAME))
                 .andExpect(model().attributeExists("account"))
                 .andExpect(model().attributeExists("profile"));
     }
-    
-    @Autowired PasswordEncoder passwordEncoder;
 
     @Test
     @DisplayName("패스워드 수정 폼")
@@ -179,6 +188,7 @@ class SettingsControllerTest {
         assertTrue(account.getNotificationSetting().isStudyUpdatedByEmail());
         assertTrue(account.getNotificationSetting().isStudyUpdatedByWeb());
     }
+
     @Test
     @DisplayName("닉네임 수정 폼")
     @WithAccount("jaime")
@@ -233,5 +243,55 @@ class SettingsControllerTest {
                 .andExpect(model().hasErrors())
                 .andExpect(model().attributeExists("nicknameForm"))
                 .andExpect(model().attributeExists("account"));
+    }
+
+    @Test
+    @DisplayName("태그 수정 폼")
+    @WithAccount("jaime")
+    void updateTagForm() throws Exception {
+        mockMvc.perform(get(SettingsController.SETTINGS_TAGS_URL))
+                .andExpect(status().isOk())
+                .andExpect(view().name(SettingsController.SETTINGS_TAGS_VIEW_NAME))
+                .andExpect(model().attributeExists("account"))
+                .andExpect(model().attributeExists("whitelist"))
+                .andExpect(model().attributeExists("tags"));
+    }
+
+
+    @Test
+    @DisplayName("태그 추가")
+    @WithAccount("jaime")
+    void addTag() throws Exception {
+        TagForm tagForm = new TagForm();
+        String tagTitle = "newTag";
+        tagForm.setTagTitle(tagTitle);
+        mockMvc.perform(post(SettingsController.SETTINGS_TAGS_URL + "/add")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(tagForm))
+                        .with(csrf()))
+                .andExpect(status().isOk());
+
+        Tag tag = tagRepository.findByTitle(tagTitle).orElse(null);
+        assertNotNull(tag);
+        assertTrue(accountRepository.findByNickname("jaime").getTags().contains(tag));
+    }
+
+    @Test
+    @DisplayName("태그 삭제")
+    @WithAccount("jaime")
+    void removeTag() throws Exception {
+        Account jaime = accountRepository.findByNickname("jaime");
+        Tag newTag = tagRepository.save(Tag.builder().title("newTag").build());
+        accountService.addTag(jaime, newTag);
+        assertTrue(jaime.getTags().contains(newTag));
+        TagForm tagForm = new TagForm();
+        String tagTitle = "newTag";
+        tagForm.setTagTitle(tagTitle);
+        mockMvc.perform(post(SettingsController.SETTINGS_TAGS_URL + "/remove")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(tagForm))
+                        .with(csrf()))
+                .andExpect(status().isOk());
+        assertFalse(jaime.getTags().contains(newTag));
     }
 }
