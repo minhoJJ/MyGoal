@@ -2,6 +2,8 @@ package com.narsm.web.module.settings.controller;
 
 import java.util.Optional;
 
+import org.hibernate.validator.constraints.Length;
+
 import com.narsm.web.module.account.domain.entity.Account;
 
 import lombok.AccessLevel;
@@ -11,9 +13,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Profile {
+    @Length(max = 35)
     private String bio;
+    @Length(max = 50)
     private String url;
+    @Length(max = 50)
     private String job;
+    @Length(max = 50)
     private String location;
 
     public static Profile from(Account account) {
