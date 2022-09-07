@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.narsm.web.module.account.domain.UserAccount;
 import com.narsm.web.module.account.domain.entity.Account;
+import com.narsm.web.module.account.domain.entity.Zone;
 import com.narsm.web.module.account.endpoint.controller.SignUpForm;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
 import com.narsm.web.module.settings.controller.NotificationForm;
@@ -125,5 +126,21 @@ public class AccountService implements UserDetailsService {
         accountRepository.findById(account.getId())
                 .map(Account::getTags)
                 .ifPresent(tags -> tags.remove(tag));
+    }
+
+    public Set<Zone> getZones(Account account) {
+        return accountRepository.findById(account.getId())
+                .orElseThrow()
+                .getZones();
+    }
+
+    public void addZone(Account account, Zone zone) {
+        accountRepository.findById(account.getId())
+                .ifPresent(a -> a.getZones().add(zone));
+    }
+
+    public void removeZone(Account account, Zone zone) {
+        accountRepository.findById(account.getId())
+                .ifPresent(a -> a.getZones().remove(zone));
     }
 }

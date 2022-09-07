@@ -65,9 +65,8 @@ public class Account extends AuditingEntity {
     @ManyToMany @ToString.Exclude
     private Set<Tag> tags = new HashSet<>();
 
-    public void setTags(Set<Tag> tags) {
-        this.tags = tags;
-    }
+    @ManyToMany @ToString.Exclude
+    private Set<Zone> zones = new HashSet<>();
 
     public static Account with(String email, String nickname, String password) {
         Account account = new Account();

@@ -6,14 +6,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 @Getter
-@ToString
 public class Zone {
     @Id
     @GeneratedValue
@@ -34,5 +36,10 @@ public class Zone {
         zone.localNameOfCity = split[1];
         zone.province = split[2];
         return zone;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s(%s)/%s", city, localNameOfCity, province);
     }
 }
