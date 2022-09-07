@@ -12,7 +12,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 
+import com.narsm.web.module.account.domain.UserAccount;
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.domain.entity.Zone;
 import com.narsm.web.module.tag.domain.entity.Tag;
@@ -22,6 +25,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@NamedEntityGraph(name = "Study.withAll", attributeNodes = {
+        @NamedAttributeNode("tags"),
+        @NamedAttributeNode("zones"),
+        @NamedAttributeNode("managers"),
+        @NamedAttributeNode("members")
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Study {
@@ -79,5 +88,18 @@ public class Study {
 
     public void addManager(Account account) {
         managers.add(account);
+    }
+
+    public boolean isJoinable(UserAccount userAccount) {
+        Account account = userAccount.getAccount();
+        return this.isPublished() && this.isRecruiting() && !this.members.contains(account) && !this.managers.contains(account);
+    }
+
+    public boolean isMember(UserAccount userAccount) {
+        return this.members.contains(userAccount.getAccount());
+    }
+
+    public boolean isManager(UserAccount userAccount) {
+        return this.managers.contains(userAccount.getAccount());
     }
 }
