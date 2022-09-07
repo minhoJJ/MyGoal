@@ -13,12 +13,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import com.narsm.web.module.account.domain.UserAccount;
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.domain.entity.Zone;
 import com.narsm.web.module.account.endpoint.controller.SignUpForm;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
+import com.narsm.web.module.config.AppProperties;
 import com.narsm.web.module.mail.EmailMessage;
 import com.narsm.web.module.mail.EmailService;
 import com.narsm.web.module.settings.controller.NotificationForm;
@@ -37,6 +40,8 @@ public class AccountService implements UserDetailsService {
     private final AccountRepository accountRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final TemplateEngine templateEngine;
+    private final AppProperties appProperties;
 
     public Account signUp(SignUpForm signUpForm) {
         Account newAccount = saveNewAccount(signUpForm);
@@ -51,11 +56,18 @@ public class AccountService implements UserDetailsService {
     }
 
     public void sendVerificationEmail(Account newAccount) {
+        Context context = new Context();
+        context.setVariable("link", String.format("/check-email-token?token=%s&email=%s", newAccount.getEmailToken(),
+                newAccount.getEmail()));
+        context.setVariable("nickname", newAccount.getNickname());
+        context.setVariable("linkName", "이메일 인증하기");
+        context.setVariable("message", "Webluxible 가입 인증을 위해 링크를 클릭하세요.");
+        context.setVariable("host", appProperties.getHost());
+        String message = templateEngine.process("mail/simple-link", context);
         emailService.sendEmail(EmailMessage.builder()
                 .to(newAccount.getEmail())
                 .subject("Webluxible 회원 가입 인증")
-                .message(String.format("/check-email-token?token=%s&email=%s", newAccount.getEmailToken(),
-                        newAccount.getEmail()))
+                .message(message)
                 .build());
     }
 
@@ -107,11 +119,18 @@ public class AccountService implements UserDetailsService {
     }
 
     public void sendLoginLink(Account account) {
+        Context context = new Context();
+        context.setVariable("link", "/login-by-email?token=" + account.getEmailToken() + "&email=" + account.getEmail());
+        context.setVariable("nickname", account.getNickname());
+        context.setVariable("linkName", "Webluxible 로그인하기");
+        context.setVariable("message", "로그인 하려면 아래 링크를 클릭하세요.");
+        context.setVariable("host", appProperties.getHost());
+        String message = templateEngine.process("mail/simple-link", context);
         account.generateToken();
         emailService.sendEmail(EmailMessage.builder()
                 .to(account.getEmail())
                 .subject("[Webluxible] 로그인 링크")
-                .message("/login-by-email?token=" + account.getEmailToken() + "&email=" + account.getEmail())
+                .message(message)
                 .build());
     }
 
