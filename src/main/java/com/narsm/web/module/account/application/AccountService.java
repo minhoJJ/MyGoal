@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,19 +19,23 @@ import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.domain.entity.Zone;
 import com.narsm.web.module.account.endpoint.controller.SignUpForm;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
+import com.narsm.web.module.mail.EmailMessage;
+import com.narsm.web.module.mail.EmailService;
 import com.narsm.web.module.settings.controller.NotificationForm;
 import com.narsm.web.module.settings.controller.Profile;
 import com.narsm.web.module.tag.domain.entity.Tag;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class AccountService implements UserDetailsService {
 
     private final AccountRepository accountRepository;
-    private final JavaMailSender mailSender;
+    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
     public Account signUp(SignUpForm signUpForm) {
@@ -49,12 +51,12 @@ public class AccountService implements UserDetailsService {
     }
 
     public void sendVerificationEmail(Account newAccount) {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(newAccount.getEmail());
-        mailMessage.setSubject("Webluxible 회원 가입 인증");
-        mailMessage.setText(String.format("/check-email-token?token=%s&email=%s", newAccount.getEmailToken(),
-                newAccount.getEmail()));
-        mailSender.send(mailMessage);
+        emailService.sendEmail(EmailMessage.builder()
+                .to(newAccount.getEmail())
+                .subject("Webluxible 회원 가입 인증")
+                .message(String.format("/check-email-token?token=%s&email=%s", newAccount.getEmailToken(),
+                        newAccount.getEmail()))
+                .build());
     }
 
     public Account findAccountByEmail(String email) {
@@ -106,11 +108,11 @@ public class AccountService implements UserDetailsService {
 
     public void sendLoginLink(Account account) {
         account.generateToken();
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(account.getEmail());
-        mailMessage.setSubject("[Webluxible] 로그인 링크");
-        mailMessage.setText("/login-by-email?token=" + account.getEmailToken() + "&email=" + account.getEmail());
-        mailSender.send(mailMessage);
+        emailService.sendEmail(EmailMessage.builder()
+                .to(account.getEmail())
+                .subject("[Webluxible] 로그인 링크")
+                .message("/login-by-email?token=" + account.getEmailToken() + "&email=" + account.getEmail())
+                .build());
     }
 
     public void addTag(Account account, Tag tag) {

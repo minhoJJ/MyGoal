@@ -34,6 +34,7 @@ import com.narsm.web.module.account.application.AccountService;
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.domain.entity.Zone;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
+import com.narsm.web.module.mail.EmailService;
 import com.narsm.web.module.tag.domain.entity.Tag;
 import com.narsm.web.module.tag.infra.repository.TagRepository;
 import com.narsm.web.module.zone.infra.repository.ZoneRepository;
@@ -51,7 +52,7 @@ class SettingsControllerTest {
     @Autowired PasswordEncoder passwordEncoder;
     @Autowired ObjectMapper objectMapper;
     @Autowired AccountService accountService;
-    @MockBean JavaMailSender mailSender;
+    @MockBean EmailService emailService;
 
     @AfterEach
     void afterEach() {

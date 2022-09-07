@@ -22,6 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.narsm.web.module.account.application.AccountService;
 import com.narsm.web.module.account.endpoint.controller.SignUpForm;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
+import com.narsm.web.module.mail.EmailService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -31,7 +32,7 @@ class MainControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired AccountService accountService;
     @Autowired AccountRepository accountRepository;
-    @MockBean JavaMailSender mailSender;
+    @MockBean EmailService emailService;
 
     @BeforeEach
     void beforeEach() {

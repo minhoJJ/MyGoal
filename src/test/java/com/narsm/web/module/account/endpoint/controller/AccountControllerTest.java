@@ -21,14 +21,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
+import com.narsm.web.module.mail.EmailMessage;
+import com.narsm.web.module.mail.EmailService;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -36,7 +36,7 @@ import com.narsm.web.module.account.infra.repository.AccountRepository;
 class AccountControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired AccountRepository accountRepository;
-    @MockBean JavaMailSender mailSender;
+    @MockBean EmailService emailService;
 
     @Test
     @DisplayName("회원 가입 화면 진입 확인")
@@ -78,9 +78,9 @@ class AccountControllerTest {
         Account account = accountRepository.findByEmail("email@email.com");
         assertNotEquals(account.getPassword(), "1234!@#$");
         assertNotNull(account.getEmailToken());
-        then(mailSender)
+        then(emailService)
                 .should()
-                .send(any(SimpleMailMessage.class));
+                .sendEmail(any(EmailMessage.class));
     }
 
     @DisplayName("인증 메일 확인: 잘못된 링크")
