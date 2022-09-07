@@ -1,0 +1,9 @@
+package com.narsm.web.module.zone.infra.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.narsm.web.module.account.domain.entity.Zone;
+
+public interface ZoneRepository extends JpaRepository<Zone, Long> {
+
+}
