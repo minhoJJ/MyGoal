@@ -18,9 +18,8 @@ import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.support.CurrentUser;
 import com.narsm.web.module.study.application.StudyService;
 import com.narsm.web.module.study.domain.entity.Study;
-import com.narsm.web.module.study.domain.entity.StudyForm;
-import com.narsm.web.module.study.domain.entity.validator.StudyFormValidator;
-import com.narsm.web.module.study.infra.repository.StudyRepository;
+import com.narsm.web.module.study.form.StudyForm;
+import com.narsm.web.module.study.form.validator.StudyFormValidator;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +28,6 @@ import lombok.RequiredArgsConstructor;
 public class StudyController {
     private final StudyService studyService;
     private final StudyFormValidator studyFormValidator;
-    private final StudyRepository studyRepository;
 
     @InitBinder("studyForm")
     public void studyFormInitBinder(WebDataBinder webDataBinder) {
@@ -55,14 +53,14 @@ public class StudyController {
     @GetMapping("/study/{path}")
     public String viewStudy(@CurrentUser Account account, @PathVariable String path, Model model) {
         model.addAttribute(account);
-        model.addAttribute(studyRepository.findByPath(path));
+        model.addAttribute(studyService.getStudy(account, path));
         return "study/view";
     }
 
     @GetMapping("/study/{path}/members")
     public String viewStudyMembers(@CurrentUser Account account, @PathVariable String path, Model model) {
         model.addAttribute(account);
-        model.addAttribute(studyRepository.findByPath(path));
+        model.addAttribute(studyService.getStudy(account, path));
         return "study/members";
     }
 }

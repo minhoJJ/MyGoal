@@ -1,10 +1,10 @@
-package com.narsm.web.module.study.domain.entity.validator;
+package com.narsm.web.module.study.form.validator;
 
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import com.narsm.web.module.study.domain.entity.StudyForm;
+import com.narsm.web.module.study.form.StudyForm;
 import com.narsm.web.module.study.infra.repository.StudyRepository;
 
 import lombok.RequiredArgsConstructor;

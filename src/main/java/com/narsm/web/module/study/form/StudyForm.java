@@ -1,4 +1,4 @@
-package com.narsm.web.module.study.domain.entity;
+package com.narsm.web.module.study.form;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;

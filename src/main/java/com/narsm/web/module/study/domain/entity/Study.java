@@ -18,6 +18,8 @@ import javax.persistence.NamedEntityGraph;
 import com.narsm.web.module.account.domain.UserAccount;
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.domain.entity.Zone;
+import com.narsm.web.module.study.form.StudyDescriptionForm;
+import com.narsm.web.module.study.form.StudyForm;
 import com.narsm.web.module.tag.domain.entity.Tag;
 
 import lombok.AccessLevel;
@@ -101,5 +103,10 @@ public class Study {
 
     public boolean isManager(UserAccount userAccount) {
         return this.managers.contains(userAccount.getAccount());
+    }
+
+    public void updateDescription(StudyDescriptionForm studyDescriptionForm) {
+        this.shortDescription = studyDescriptionForm.getShortDescription();
+        this.fullDescription = studyDescriptionForm.getFullDescription();
     }
 }

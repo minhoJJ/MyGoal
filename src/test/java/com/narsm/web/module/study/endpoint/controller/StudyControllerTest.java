@@ -24,7 +24,7 @@ import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
 import com.narsm.web.module.mail.EmailService;
 import com.narsm.web.module.study.application.StudyService;
-import com.narsm.web.module.study.domain.entity.StudyForm;
+import com.narsm.web.module.study.form.StudyForm;
 import com.narsm.web.module.study.infra.repository.StudyRepository;
 
 @Transactional

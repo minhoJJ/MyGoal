@@ -22,6 +22,7 @@ import org.hibernate.Hibernate;
 
 import com.narsm.web.module.domain.entity.AuditingEntity;
 import com.narsm.web.module.settings.controller.NotificationForm;
+import com.narsm.web.module.study.domain.entity.Study;
 import com.narsm.web.module.tag.domain.entity.Tag;
 
 import lombok.AccessLevel;
@@ -130,6 +131,10 @@ public class Account extends AuditingEntity {
 
     public boolean isValid(String token) {
         return this.emailToken.equals(token);
+    }
+
+    public boolean isManagerOf(Study study) {
+        return study.getManagers().contains(this);
     }
 
     @Embeddable
