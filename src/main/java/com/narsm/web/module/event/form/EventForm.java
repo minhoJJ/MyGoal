@@ -10,9 +10,15 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.narsm.web.module.event.domain.entity.EventType;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class EventForm {
     @NotBlank
     @Length(max = 50)
