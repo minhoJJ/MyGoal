@@ -1,5 +1,7 @@
 package com.narsm.web.module.study.domain.entity;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,6 +46,9 @@ import lombok.experimental.Accessors;
 })
 @NamedEntityGraph(name = "Study.withManagers", attributeNodes = {
         @NamedAttributeNode("managers")
+})
+@NamedEntityGraph(name = "Study.withMembers", attributeNodes = {
+        @NamedAttributeNode("members")
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -194,5 +199,17 @@ public class Study {
         }
         this.recruiting = false;
         this.recruitingUpdatedDateTime = LocalDateTime.now();
+    }
+
+    public void addMember(Account account) {
+        this.members.add(account);
+    }
+
+    public void removeMember(Account account) {
+        this.members.remove(account);
+    }
+
+    public String getEncodedPath() {
+        return URLEncoder.encode(path, StandardCharsets.UTF_8);
     }
 }

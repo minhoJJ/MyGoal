@@ -1,5 +1,6 @@
 package com.narsm.web.module.study.endpoint.controller;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,6 +25,7 @@ import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.infra.repository.AccountRepository;
 import com.narsm.web.module.mail.EmailService;
 import com.narsm.web.module.study.application.StudyService;
+import com.narsm.web.module.study.domain.entity.Study;
 import com.narsm.web.module.study.form.StudyForm;
 import com.narsm.web.module.study.infra.repository.StudyRepository;
 
@@ -140,5 +142,49 @@ class StudyControllerTest {
                 .andExpect(view().name("study/members"))
                 .andExpect(model().attributeExists("account"))
                 .andExpect(model().attributeExists("study"));
+    }
+
+    @Test
+    @DisplayName("스터디 가입")
+    @WithAccount(value = {"jaime", "test"})
+    void joinStudy() throws Exception {
+        // 스터디 생성
+        Account manager = accountRepository.findByNickname("jaime");
+        String studyPath = "study-path";
+        Study study = studyService.createNewStudy(StudyForm.builder()
+                .path(studyPath)
+                .title("study-title")
+                .shortDescription("short-description")
+                .fullDescription("full-description")
+                .build(), manager);
+        // 스터디 가입
+        mockMvc.perform(get("/study/" + studyPath + "/join"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/" + studyPath + "/members"));
+        Account member = accountRepository.findByNickname("test");
+        assertTrue(study.getMembers().contains(member));
+    }
+
+    @Test
+    @DisplayName("스터디 탈퇴")
+    @WithAccount(value = {"jaime", "test"})
+    void leaveStudy() throws Exception {
+        // 스터디 생성
+        Account manager = accountRepository.findByNickname("jaime");
+        String studyPath = "study-path";
+        Study study = studyService.createNewStudy(StudyForm.builder()
+                .path(studyPath)
+                .title("study-title")
+                .shortDescription("short-description")
+                .fullDescription("full-description")
+                .build(), manager);
+        // 스터디 가입
+        Account member = accountRepository.findByNickname("test");
+        studyService.addMember(study, member);
+        // 스터디 탈퇴
+        mockMvc.perform(get("/study/" + studyPath + "/leave"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/study/" + studyPath + "/members"));
+        assertFalse(study.getMembers().contains(member));
     }
 }

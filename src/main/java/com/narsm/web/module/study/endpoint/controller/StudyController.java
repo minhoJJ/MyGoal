@@ -20,6 +20,7 @@ import com.narsm.web.module.study.application.StudyService;
 import com.narsm.web.module.study.domain.entity.Study;
 import com.narsm.web.module.study.form.StudyForm;
 import com.narsm.web.module.study.form.validator.StudyFormValidator;
+import com.narsm.web.module.study.infra.repository.StudyRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class StudyController {
     private final StudyService studyService;
     private final StudyFormValidator studyFormValidator;
+    private final StudyRepository studyRepository;
 
     @InitBinder("studyForm")
     public void studyFormInitBinder(WebDataBinder webDataBinder) {
@@ -62,5 +64,19 @@ public class StudyController {
         model.addAttribute(account);
         model.addAttribute(studyService.getStudy(account, path));
         return "study/members";
+    }
+
+    @GetMapping("/study/{path}/join")
+    public String joinStudy(@CurrentUser Account account, @PathVariable String path) {
+        Study study = studyRepository.findStudyWithMembersByPath(path);
+        studyService.addMember(study, account);
+        return "redirect:/study/" + study.getEncodedPath() + "/members";
+    }
+
+    @GetMapping("/study/{path}/leave")
+    public String leaveStudy(@CurrentUser Account account, @PathVariable String path) {
+        Study study = studyRepository.findStudyWithMembersByPath(path);
+        studyService.removeMember(study, account);
+        return "redirect:/study/" + study.getEncodedPath() + "/members";
     }
 }
