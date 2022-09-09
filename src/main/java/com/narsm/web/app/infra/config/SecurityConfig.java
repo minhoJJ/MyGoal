@@ -27,7 +27,8 @@ public class SecurityConfig {
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeRequests()
         .mvcMatchers("/", "/login", "/sign-up", "/check-email-token",
-                "/email-login", "/check-email-login", "/login-link", "/login-by-email").permitAll() // "/login-by-email"을 추가해줍니다.
+                "/email-login", "/check-email-login", "/login-link", "/login-by-email",
+                "/search/study").permitAll() // "/login-by-email"을 추가해줍니다.
         .mvcMatchers(HttpMethod.GET, "/profile/*").permitAll()
         .anyRequest().authenticated();
         http.formLogin()
