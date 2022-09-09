@@ -18,21 +18,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.narsm.web.app.infra.IntegrationTest;
 import com.narsm.web.app.infra.mail.EmailMessage;
 import com.narsm.web.app.infra.mail.EmailService;
 import com.narsm.web.app.modules.account.domain.entity.Account;
 import com.narsm.web.app.modules.account.infra.repository.AccountRepository;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
+@IntegrationTest
 class AccountControllerTest {
     @Autowired MockMvc mockMvc;
     @Autowired AccountRepository accountRepository;
