@@ -8,6 +8,7 @@ import javax.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.narsm.web.module.event.domain.entity.Event;
 import com.narsm.web.module.event.domain.entity.EventType;
 
 import lombok.AllArgsConstructor;
@@ -40,4 +41,15 @@ public class EventForm {
     @Min(2)
     private Integer limitOfEnrollments = 2;
 
+    public static EventForm from(Event event) {
+        EventForm eventForm = new EventForm();
+        eventForm.title = event.getTitle();
+        eventForm.description = event.getDescription();
+        eventForm.eventType = event.getEventType();
+        eventForm.endEnrollmentDateTime = event.getEndEnrollmentDateTime();
+        eventForm.startDateTime = event.getStartDateTime();
+        eventForm.endDateTime = event.getEndDateTime();
+        eventForm.limitOfEnrollments = event.getLimitOfEnrollments();
+        return eventForm;
+    }
 }
