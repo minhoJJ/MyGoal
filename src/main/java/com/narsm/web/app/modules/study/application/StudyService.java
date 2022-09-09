@@ -1,5 +1,6 @@
 package com.narsm.web.app.modules.study.application;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,6 +9,7 @@ import com.narsm.web.app.modules.account.domain.entity.Account;
 import com.narsm.web.app.modules.study.domain.entity.Study;
 import com.narsm.web.app.modules.study.endpoint.form.StudyDescriptionForm;
 import com.narsm.web.app.modules.study.endpoint.form.StudyForm;
+import com.narsm.web.app.modules.study.event.StudyCreatedEvent;
 import com.narsm.web.app.modules.study.infra.repository.StudyRepository;
 import com.narsm.web.app.modules.tag.domain.entity.Tag;
 import com.narsm.web.app.modules.zone.domain.entity.Zone;
@@ -19,10 +21,12 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class StudyService {
     private final StudyRepository studyRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public Study createNewStudy(StudyForm studyForm, Account account) {
         Study study = Study.from(studyForm);
         study.addManager(account);
+        eventPublisher.publishEvent(new StudyCreatedEvent(study));
         return studyRepository.save(study);
     }
 
