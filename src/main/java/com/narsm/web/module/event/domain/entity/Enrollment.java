@@ -10,7 +10,6 @@ import javax.persistence.ManyToOne;
 import com.narsm.web.module.account.domain.entity.Account;
 
 import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -50,11 +49,23 @@ public class Enrollment {
         this.accepted = true;
     }
 
+    public void reject() {
+        this.accepted = false;
+    }
+
     public void attach(Event event) {
         this.event = event;
     }
 
     public void detachEvent() {
         this.event = null;
+    }
+
+    public void attend() {
+        this.attended = true;
+    }
+
+    public void absent() {
+        this.attended = false;
     }
 }

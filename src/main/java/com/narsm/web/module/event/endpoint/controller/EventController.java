@@ -1,7 +1,6 @@
 package com.narsm.web.module.event.endpoint.controller;
 
 import java.time.LocalDateTime;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,15 +15,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.account.support.CurrentUser;
 import com.narsm.web.module.event.application.EventService;
+import com.narsm.web.module.event.domain.entity.Enrollment;
 import com.narsm.web.module.event.domain.entity.Event;
 import com.narsm.web.module.event.form.EventForm;
 import com.narsm.web.module.event.form.validator.EventValidator;
+import com.narsm.web.module.event.infra.repository.EnrollmentRepository;
 import com.narsm.web.module.event.infra.repository.EventRepository;
 import com.narsm.web.module.study.application.StudyService;
 import com.narsm.web.module.study.domain.entity.Study;
@@ -41,6 +41,7 @@ public class EventController {
     private final EventService eventService;
     private final EventRepository eventRepository;
     private final StudyRepository studyRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final EventValidator eventValidator;
 
     @InitBinder("eventForm")
@@ -58,7 +59,7 @@ public class EventController {
     }
 
     @PostMapping("/new-event")
-    public String createNewEvent(@CurrentUser Account account, @PathVariable String path, @Valid @RequestBody EventForm eventForm, Errors errors, Model model) {
+    public String createNewEvent(@CurrentUser Account account, @PathVariable String path, @Valid EventForm eventForm, Errors errors, Model model) {
         Study study = studyService.getStudyToUpdateStatus(account, path);
         if (errors.hasErrors()) {
             model.addAttribute(account);
@@ -70,10 +71,9 @@ public class EventController {
     }
 
     @GetMapping("/events/{id}")
-    public String getEvent(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, Model model) {
+    public String getEvent(@CurrentUser Account account, @PathVariable String path, @PathVariable("id") Event event, Model model) {
         model.addAttribute(account);
-        model.addAttribute(eventRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 모임은 존재하지 않습니다.")));
+        model.addAttribute(event);
         model.addAttribute(studyRepository.findStudyWithManagersByPath(path));
         return "event/view";
     }
@@ -99,11 +99,8 @@ public class EventController {
     }
 
     @GetMapping("/events/{id}/edit")
-    public String updateEventForm(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, Model model) {
-        Study study = studyService.getStudyToUpdate(account, path);
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("모임이 존재하지 않습니다."));
-        model.addAttribute(study);
+    public String updateEventForm(@CurrentUser Account account, @PathVariable String path, @PathVariable("id") Event event, Model model) {
+        model.addAttribute(studyService.getStudyToUpdate(account, path));
         model.addAttribute(account);
         model.addAttribute(event);
         model.addAttribute(EventForm.from(event));
@@ -111,10 +108,8 @@ public class EventController {
     }
 
     @PostMapping("/events/{id}/edit")
-    public String updateEventSubmit(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, @Valid @RequestBody EventForm eventForm, Errors errors, Model model) {
+    public String updateEventSubmit(@CurrentUser Account account, @PathVariable String path, @PathVariable("id") Event event, @Valid EventForm eventForm, Errors errors, Model model) {
         Study study = studyService.getStudyToUpdate(account, path);
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("모임이 존재하지 않습니다."));
         eventForm.setEventType(event.getEventType());
         eventValidator.validateUpdateForm(eventForm, event, errors);
         if (errors.hasErrors()) {
@@ -128,26 +123,51 @@ public class EventController {
     }
 
     @DeleteMapping("/events/{id}")
-    public String deleteEvent(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id) {
+    public String deleteEvent(@CurrentUser Account account, @PathVariable String path, @PathVariable("id") Event event) {
         Study study = studyService.getStudyToUpdateStatus(account, path);
-        eventService.deleteEvent(eventRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("모임이 존재하지 않습니다.")));
+        eventService.deleteEvent(event);
         return "redirect:/study/" + study.getEncodedPath() + "/events";
     }
 
     @PostMapping("/events/{id}/enroll")
-    public String enroll(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id) {
+    public String enroll(@CurrentUser Account account, @PathVariable String path, @PathVariable("id") Event event) {
         Study study = studyService.getStudyToEnroll(path);
-        eventService.enroll(eventRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("모임이 존재하지 않습니다.")), account);
-        return "redirect:/study/" + study.getEncodedPath() + "/events/" + id;
+        eventService.enroll(event, account);
+        return "redirect:/study/" + study.getEncodedPath() + "/events/" + event.getId();
     }
 
     @PostMapping("/events/{id}/leave")
-    public String leave(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id) {
+    public String leave(@CurrentUser Account account, @PathVariable String path, @PathVariable("id") Event event) {
         Study study = studyService.getStudyToEnroll(path);
-        eventService.leave(eventRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("모임이 존재하지 않습니다.")), account);
-        return "redirect:/study/" + study.getEncodedPath() + "/events/" + id;
+        eventService.leave(event, account);
+        return "redirect:/study/" + study.getEncodedPath() + "/events/" + event.getId();
+    }
+
+    @GetMapping("/events/{eventId}/enrollments/{enrollmentId}/accept")
+    public String acceptEnrollment(@CurrentUser Account account, @PathVariable String path, @PathVariable("eventId") Event event, @PathVariable("enrollmentId") Enrollment enrollment) {
+        Study study = studyService.getStudyToUpdate(account, path);
+        eventService.acceptEnrollment(event, enrollment);
+        return "redirect:/study/" + study.getEncodedPath() + "/events/" + event.getId();
+    }
+
+    @GetMapping("/events/{eventId}/enrollments/{enrollmentId}/reject")
+    public String rejectEnrollment(@CurrentUser Account account, @PathVariable String path, @PathVariable("eventId") Event event, @PathVariable("enrollmentId") Enrollment enrollment) {
+        Study study = studyService.getStudyToUpdate(account, path);
+        eventService.rejectEnrollment(event, enrollment);
+        return "redirect:/study/" + study.getEncodedPath() + "/events/" + event.getId();
+    }
+
+    @GetMapping("/events/{eventId}/enrollments/{enrollmentId}/checkin")
+    public String checkInEnrollment(@CurrentUser Account account, @PathVariable String path, @PathVariable("eventId") Event event, @PathVariable("enrollmentId") Enrollment enrollment) {
+        Study study = studyService.getStudyToUpdate(account, path);
+        eventService.checkInEnrollment(event, enrollment);
+        return "redirect:/study/" + study.getEncodedPath() + "/events/" + event.getId();
+    }
+
+    @GetMapping("/events/{eventId}/enrollments/{enrollmentId}/cancel-checkin")
+    public String cancelCheckInEnrollment(@CurrentUser Account account, @PathVariable String path, @PathVariable("eventId") Event event, @PathVariable("enrollmentId") Enrollment enrollment) {
+        Study study = studyService.getStudyToUpdate(account, path);
+        eventService.cancelCheckinEnrollment(event, enrollment);
+        return "redirect:/study/" + study.getEncodedPath() + "/events/" + event.getId();
     }
 }

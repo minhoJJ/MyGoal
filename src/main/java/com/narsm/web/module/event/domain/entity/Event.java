@@ -16,6 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 
 import com.narsm.web.module.account.domain.UserAccount;
 import com.narsm.web.module.account.domain.entity.Account;
@@ -67,6 +68,7 @@ public class Event {
     private Integer limitOfEnrollments;
 
     @OneToMany(mappedBy = "event") @ToString.Exclude
+    @OrderBy("enrolledAt")
     private List<Enrollment> enrollments = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
@@ -88,11 +90,11 @@ public class Event {
     }
 
     public boolean isEnrollableFor(UserAccount userAccount) {
-        return isNotClosed() && !isAlreadyEnrolled(userAccount);
+        return isNotClosed() && !isAttended(userAccount) && !isAlreadyEnrolled(userAccount);
     }
 
     public boolean isDisenrollableFor(UserAccount userAccount) {
-        return isNotClosed() && isAlreadyEnrolled(userAccount);
+        return isNotClosed() && !isAttended(userAccount) && isAlreadyEnrolled(userAccount);
     }
 
     private boolean isNotClosed() {
@@ -176,5 +178,32 @@ public class Event {
             int numberToAccept = (int) Math.min(limitOfEnrollments - getNumberOfAcceptedEnrollments(), waitingList.size());
             waitingList.subList(0, numberToAccept).forEach(Enrollment::accept);
         }
+    }
+
+    public void accept(Enrollment enrollment) {
+        if (this.eventType == EventType.CONFIRMATIVE && this.limitOfEnrollments > this.getNumberOfAcceptedEnrollments()) {
+            enrollment.accept();
+        }
+    }
+
+    public void reject(Enrollment enrollment) {
+        if (this.eventType == EventType.CONFIRMATIVE) {
+            enrollment.reject();
+        }
+    }
+
+    public boolean isAcceptable(Enrollment enrollment) {
+        return this.eventType == EventType.CONFIRMATIVE
+                && this.enrollments.contains(enrollment)
+                && this.limitOfEnrollments > this.getNumberOfAcceptedEnrollments()
+                && !enrollment.isAttended()
+                && !enrollment.isAccepted();
+    }
+
+    public boolean isRejectable(Enrollment enrollment) {
+        return this.eventType == EventType.CONFIRMATIVE
+                && this.enrollments.contains(enrollment)
+                && !enrollment.isAttended()
+                && enrollment.isAccepted();
     }
 }
