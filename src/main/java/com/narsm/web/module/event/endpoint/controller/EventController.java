@@ -1,6 +1,7 @@
 package com.narsm.web.module.event.endpoint.controller;
 
 import java.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.narsm.web.module.account.domain.entity.Account;
@@ -56,7 +58,7 @@ public class EventController {
     }
 
     @PostMapping("/new-event")
-    public String createNewEvent(@CurrentUser Account account, @PathVariable String path, @Valid EventForm eventForm, Errors errors, Model model) {
+    public String createNewEvent(@CurrentUser Account account, @PathVariable String path, @Valid @RequestBody EventForm eventForm, Errors errors, Model model) {
         Study study = studyService.getStudyToUpdateStatus(account, path);
         if (errors.hasErrors()) {
             model.addAttribute(account);
@@ -109,7 +111,7 @@ public class EventController {
     }
 
     @PostMapping("/events/{id}/edit")
-    public String updateEventSubmit(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, @Valid EventForm eventForm, Errors errors, Model model) {
+    public String updateEventSubmit(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, @Valid @RequestBody EventForm eventForm, Errors errors, Model model) {
         Study study = studyService.getStudyToUpdate(account, path);
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("모임이 존재하지 않습니다."));
@@ -122,7 +124,7 @@ public class EventController {
             return "event/update-form";
         }
         eventService.updateEvent(event, eventForm);
-        return "redirect:/study/" + study.getEncodedPath() +  "/events/" + event.getId();
+        return "redirect:/study/" + study.getEncodedPath() + "/events/" + event.getId();
     }
 
     @DeleteMapping("/events/{id}")
