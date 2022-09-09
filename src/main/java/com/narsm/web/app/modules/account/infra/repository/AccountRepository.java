@@ -1,12 +1,13 @@
 package com.narsm.web.app.modules.account.infra.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.narsm.web.app.modules.account.domain.entity.Account;
 
 @Transactional(readOnly = true)
-public interface AccountRepository extends JpaRepository<Account, Long> {
+public interface AccountRepository extends JpaRepository<Account, Long>, QuerydslPredicateExecutor<Account> {
 
     boolean existsByEmail(String email);
 
@@ -16,3 +17,4 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Account findByNickname(String nickname);
 }
+

@@ -50,6 +50,10 @@ import lombok.experimental.Accessors;
 @NamedEntityGraph(name = "Study.withMembers", attributeNodes = {
         @NamedAttributeNode("members")
 })
+@NamedEntityGraph(name = "Study.withTagsAndZones", attributeNodes = {
+        @NamedAttributeNode("tags"),
+        @NamedAttributeNode("zones")
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Study {
