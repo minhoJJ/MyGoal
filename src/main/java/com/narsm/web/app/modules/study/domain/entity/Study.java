@@ -17,6 +17,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import com.narsm.web.app.modules.account.domain.UserAccount;
 import com.narsm.web.app.modules.account.domain.entity.Account;
 import com.narsm.web.app.modules.study.endpoint.form.StudyDescriptionForm;
@@ -100,6 +102,9 @@ public class Study {
 
     @Accessors(fluent = true)
     private boolean useBanner;
+
+    @ColumnDefault(value = "0")
+    private Integer memberCount;
 
     public static Study from(StudyForm studyForm) {
         Study study = new Study();
@@ -207,10 +212,12 @@ public class Study {
 
     public void addMember(Account account) {
         this.members.add(account);
+        this.memberCount++;
     }
 
     public void removeMember(Account account) {
         this.members.remove(account);
+        this.memberCount--;
     }
 
     public String getEncodedPath() {
