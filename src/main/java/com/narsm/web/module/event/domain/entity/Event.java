@@ -12,6 +12,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import com.narsm.web.module.account.domain.UserAccount;
 import com.narsm.web.module.account.domain.entity.Account;
 import com.narsm.web.module.event.form.EventForm;
 import com.narsm.web.module.study.domain.entity.Study;
@@ -62,10 +63,6 @@ public class Event {
     @Enumerated(EnumType.STRING)
     private EventType eventType;
 
-    public void setEnrollments(List<Enrollment> enrollments) {
-        this.enrollments = enrollments;
-    }
-
     public static Event from(EventForm eventForm, Account account, Study study) {
         Event event = new Event();
         event.eventType = eventForm.getEventType();
@@ -79,5 +76,37 @@ public class Event {
         event.study = study;
         event.createdDateTime = LocalDateTime.now();
         return event;
+    }
+
+    public boolean isEnrollableFor(UserAccount userAccount) {
+        return isNotClosed() && !isAlreadyEnrolled(userAccount);
+    }
+
+    public boolean isDisenrollableFor(UserAccount userAccount) {
+        return isNotClosed() && isAlreadyEnrolled(userAccount);
+    }
+
+    private boolean isNotClosed() {
+        return this.endEnrollmentDateTime.isAfter(LocalDateTime.now());
+    }
+
+    private boolean isAlreadyEnrolled(UserAccount userAccount) {
+        Account account = userAccount.getAccount();
+        for (Enrollment enrollment : this.enrollments) {
+            if (enrollment.getAccount().equals(account)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isAttended(UserAccount userAccount) {
+        Account account = userAccount.getAccount();
+        for (Enrollment enrollment : this.enrollments) {
+            if (enrollment.getAccount().equals(account) && enrollment.isAttended()) {
+                return true;
+            }
+        }
+        return false;
     }
 }

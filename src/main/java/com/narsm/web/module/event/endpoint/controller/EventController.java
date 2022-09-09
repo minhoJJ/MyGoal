@@ -18,8 +18,10 @@ import com.narsm.web.module.event.application.EventService;
 import com.narsm.web.module.event.domain.entity.Event;
 import com.narsm.web.module.event.form.EventForm;
 import com.narsm.web.module.event.form.validator.EventValidator;
+import com.narsm.web.module.event.infra.repository.EventRepository;
 import com.narsm.web.module.study.application.StudyService;
 import com.narsm.web.module.study.domain.entity.Study;
+import com.narsm.web.module.study.infra.repository.StudyRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -30,6 +32,8 @@ public class EventController {
 
     private final StudyService studyService;
     private final EventService eventService;
+    private final EventRepository eventRepository;
+    private final StudyRepository studyRepository;
     private final EventValidator eventValidator;
 
     @InitBinder("eventForm")
@@ -56,5 +60,14 @@ public class EventController {
         }
         Event event = eventService.createEvent(study, eventForm, account);
         return "redirect:/study/" + study.getEncodedPath() + "/events/" + event.getId();
+    }
+
+    @GetMapping("/events/{id}")
+    public String getEvent(@CurrentUser Account account, @PathVariable String path, @PathVariable Long id, Model model) {
+        model.addAttribute(account);
+        model.addAttribute(eventRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 모임은 존재하지 않습니다.")));
+        model.addAttribute(studyRepository.findStudyWithManagersByPath(path));
+        return "event/view";
     }
 }
