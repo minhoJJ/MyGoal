@@ -19,22 +19,42 @@ import lombok.ToString;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @ToString
-@EqualsAndHashCode(of = "id")
 public class Enrollment {
 
-  @Id
-  @GeneratedValue
-  private Long id;
+    @Id
+    @GeneratedValue
+    private Long id;
 
-  @ManyToOne
-  private Event event;
+    @ManyToOne
+    private Event event;
 
-  @ManyToOne
-  private Account account;
+    @ManyToOne
+    private Account account;
 
-  private LocalDateTime enrolledAt;
+    private LocalDateTime enrolledAt;
 
-  private boolean accepted;
+    private boolean accepted;
 
-  private boolean attended;
+    private boolean attended;
+
+
+    public static Enrollment of(LocalDateTime enrolledAt, boolean isAbleToAcceptWaitingEnrollment, Account account) {
+        Enrollment enrollment = new Enrollment();
+        enrollment.enrolledAt = enrolledAt;
+        enrollment.accepted = isAbleToAcceptWaitingEnrollment;
+        enrollment.account = account;
+        return enrollment;
+    }
+
+    public void accept() {
+        this.accepted = true;
+    }
+
+    public void attach(Event event) {
+        this.event = event;
+    }
+
+    public void detachEvent() {
+        this.event = null;
+    }
 }
