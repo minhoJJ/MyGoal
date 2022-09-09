@@ -9,7 +9,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import com.narsm.web.app.modules.account.domain.entity.Account;
+import com.narsm.web.app.modules.account.infra.repository.AccountRepository;
 import com.narsm.web.app.modules.account.support.CurrentUser;
+import com.narsm.web.app.modules.event.infra.repository.EnrollmentRepository;
 import com.narsm.web.app.modules.study.domain.entity.Study;
 import com.narsm.web.app.modules.study.infra.repository.StudyRepository;
 
@@ -19,30 +21,46 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MainController {
 
-    private final StudyRepository studyRepository;
+  private final StudyRepository studyRepository;
+  private final AccountRepository accountRepository;
+  private final EnrollmentRepository enrollmentRepository;
 
-    @GetMapping("/")
-    public String home(@CurrentUser Account account, Model model) {
-        if (account != null) {
-            model.addAttribute(account);
-        }
-        return "index";
+  @GetMapping("/")
+  public String home(@CurrentUser Account account, Model model) {
+    if (account != null) {
+      Account accountLoaded = accountRepository.findAccountWithTagsAndZonesById(account.getId());
+      model.addAttribute(accountLoaded);
+      model.addAttribute("enrollmentList",
+          enrollmentRepository.findByAccountAndAcceptedOrderByEnrolledAtDesc(accountLoaded, true));
+      model.addAttribute("studyList",
+          studyRepository.findByAccount(accountLoaded.getTags(), accountLoaded.getZones()));
+      model.addAttribute("studyManagerOf",
+          studyRepository.findFirst5ByManagersContainingAndClosedOrderByPublishedDateTimeDesc(
+              account, false));
+      model.addAttribute("studyMemberOf",
+          studyRepository.findFirst5ByMembersContainingAndClosedOrderByPublishedDateTimeDesc(
+              account, false));
+      return "home";
     }
+    model.addAttribute("studyList",
+        studyRepository.findFirst9ByPublishedAndClosedOrderByPublishedDateTimeDesc(true, false));
+    return "index";
+  }
 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
-    }
+  @GetMapping("/login")
+  public String login() {
+    return "login";
+  }
 
-    @GetMapping("/search/study")
-    public String searchStudy(String keyword, Model model,
-                              @PageableDefault(size = 9, sort = "publishedDateTime", direction = Sort.Direction.ASC) Pageable pageable) {
-        Page<Study> studyPage = studyRepository.findByKeyword(keyword, pageable);
-        model.addAttribute("studyPage", studyPage);
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("sortProperty", pageable.getSort().toString().contains("publishedDateTime")
-                ? "publishedDateTime"
-                : "memberCount");
-        return "search";
-    }
+  @GetMapping("/search/study")
+  public String searchStudy(String keyword, Model model,
+      @PageableDefault(size = 9, sort = "publishedDateTime", direction = Sort.Direction.ASC) Pageable pageable) {
+    Page<Study> studyPage = studyRepository.findByKeyword(keyword, pageable);
+    model.addAttribute("studyPage", studyPage);
+    model.addAttribute("keyword", keyword);
+    model.addAttribute("sortProperty", pageable.getSort().toString().contains("publishedDateTime")
+        ? "publishedDateTime"
+        : "memberCount");
+    return "search";
+  }
 }
