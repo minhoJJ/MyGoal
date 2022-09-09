@@ -1,5 +1,9 @@
 package com.narsm.web.module.event.endpoint.controller;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
@@ -69,5 +73,25 @@ public class EventController {
                 .orElseThrow(() -> new IllegalArgumentException("해당 모임은 존재하지 않습니다.")));
         model.addAttribute(studyRepository.findStudyWithManagersByPath(path));
         return "event/view";
+    }
+
+    @GetMapping("/events")
+    public String viewStudyEvents(@CurrentUser Account account, @PathVariable String path, Model model) {
+        Study study = studyService.getStudy(path);
+        model.addAttribute(account);
+        model.addAttribute(study);
+        List<Event> events = eventRepository.findByStudyOrderByStartDateTime(study);
+        List<Event> newEvents = new ArrayList<>();
+        List<Event> oldEvents = new ArrayList<>();
+        for (Event event : events) {
+            if (event.getEndDateTime().isBefore(LocalDateTime.now())) {
+                oldEvents.add(event);
+            } else {
+                newEvents.add(event);
+            }
+        }
+        model.addAttribute("newEvents", newEvents);
+        model.addAttribute("oldEvents", oldEvents);
+        return "study/events";
     }
 }

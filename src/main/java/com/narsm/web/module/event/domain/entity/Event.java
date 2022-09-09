@@ -10,6 +10,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 
 import com.narsm.web.module.account.domain.UserAccount;
@@ -22,6 +24,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+@NamedEntityGraph(
+        name = "Event.withEnrollments",
+        attributeNodes = @NamedAttributeNode("enrollments")
+)
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -108,5 +114,12 @@ public class Event {
             }
         }
         return false;
+    }
+
+    public int numberOfRemainSpots() {
+        int accepted = (int) this.enrollments.stream()
+                .filter(Enrollment::isAccepted)
+                .count();
+        return this.limitOfEnrollments - accepted;
     }
 }
