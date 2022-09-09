@@ -13,9 +13,11 @@ import com.narsm.web.app.modules.study.event.StudyCreatedEvent;
 import com.narsm.web.app.modules.study.event.StudyUpdateEvent;
 import com.narsm.web.app.modules.study.infra.repository.StudyRepository;
 import com.narsm.web.app.modules.tag.domain.entity.Tag;
+import com.narsm.web.app.modules.tag.infra.repository.TagRepository;
 import com.narsm.web.app.modules.zone.domain.entity.Zone;
 
 import lombok.RequiredArgsConstructor;
+import net.bytebuddy.utility.RandomString;
 
 @Service
 @RequiredArgsConstructor
